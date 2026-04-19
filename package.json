@@ -1,0 +1,23 @@
+{
+  "name": "codex-pixel-engine-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @codex-game/engine && npm run build -w @codex-game/demo",
+    "dev": "npm run dev -w @codex-game/demo",
+    "test": "npm run test -w @codex-game/engine",
+    "typecheck": "npm run typecheck -w @codex-game/engine && npm run typecheck -w @codex-game/demo"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "electron": "^25.9.8",
+    "typescript": "^5.4.5",
+    "vite": "^4.5.3",
+    "vitest": "^0.34.6"
+  }
+}
+

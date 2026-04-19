@@ -1,0 +1,16 @@
+{
+  "name": "@codex-game/demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:renderer && npm run build:electron",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build:renderer": "vite build",
+    "dev": "node ./scripts/dev.cjs",
+    "start": "electron ./dist-electron/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit"
+  },
+  "dependencies": {
+    "@codex-game/engine": "file:../../packages/engine"
+  }
+}
