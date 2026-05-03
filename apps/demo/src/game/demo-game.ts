@@ -18,7 +18,7 @@ const WORLD_HEIGHT = 360;
 
 export const assetManifest: AssetManifest = {
   demoSprites: {
-    src: "/assets/sprites/demo-sprites.png",
+    src: "./assets/sprites/demo-sprites.png",
     frames: {
       player: { x: 0, y: 0, width: 16, height: 16 },
       crate: { x: 16, y: 0, width: 16, height: 16 }
@@ -179,4 +179,3 @@ function drawBackground(
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
-

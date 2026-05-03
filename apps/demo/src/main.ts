@@ -7,6 +7,47 @@ import {
   setupDemoScene
 } from "./game/demo-game";
 
+function serializeError(error: unknown): unknown {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    };
+  }
+
+  return error;
+}
+
+function log(
+  level: "debug" | "info" | "warn" | "error",
+  message: string,
+  details?: unknown
+): void {
+  window.codexHost?.log(level, message, details);
+
+  const consoleMethod = level === "debug" ? "log" : level;
+  console[consoleMethod](`[Codex Pixel Engine] ${message}`, details ?? "");
+}
+
+function showStartupFailure(error: unknown): void {
+  const panel = document.createElement("section");
+  panel.className = "startup-error";
+  panel.innerHTML = `
+    <h1>Startup failed</h1>
+    <p>The demo could not finish constructing the scene. Check the runtime log at:</p>
+    <code>%APPDATA%\\Codex Pixel Engine Demo\\logs\\runtime-log.txt</code>
+  `;
+  document.body.append(panel);
+
+  log("error", "startup failed", serializeError(error));
+}
+
+log("info", "renderer boot", {
+  href: window.location.href,
+  platform: window.codexHost?.platform ?? "browser"
+});
+
 const appRoot = document.querySelector<HTMLDivElement>("#app");
 
 if (!appRoot) {
@@ -34,6 +75,7 @@ hud.innerHTML = `
 viewport.append(canvas);
 frame.append(viewport, hud);
 appRoot.append(frame);
+log("info", "renderer DOM constructed");
 
 const game = createGame({
   canvas,
@@ -42,7 +84,22 @@ const game = createGame({
   fixedDeltaTime: 1 / 60,
   assetManifest,
   systems: createDemoSystems(),
-  setup: setupDemoScene
+  setup: (context) => {
+    log("info", "ECS scene setup starting");
+    setupDemoScene(context);
+    log("info", "ECS scene setup completed", {
+      entityCount: context.world.size
+    });
+  }
 });
 
-void game.start();
+game
+  .start()
+  .then(() => {
+    log("info", "game started", {
+      entityCount: game.getWorld().size,
+      canvasWidth: canvas.width,
+      canvasHeight: canvas.height
+    });
+  })
+  .catch(showStartupFailure);

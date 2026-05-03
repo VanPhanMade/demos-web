@@ -1,8 +1,10 @@
 node_modules/
 .npm-cache/
+logs/
 dist/
 dist-electron/
 release/
+Codex Pixel Engine Demo/
 coverage/
 *.log
 *.tsbuildinfo

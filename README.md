@@ -31,3 +31,13 @@ The build creates both an installer and a portable executable:
 - `Codex Pixel Engine Demo-0.1.0-portable.exe`
 
 These local builds are unsigned. For a public release, add a Windows code-signing certificate and remove the unsigned-build workaround in `apps/demo/electron-builder.json`.
+
+## Debug Logs
+
+The build, installer, and packaged app each write text logs:
+
+- Build script logs: `logs/build-exe-*.txt`
+- Installer logs: `%LOCALAPPDATA%\Codex Pixel Engine Demo\logs\installer-log.txt`
+- App runtime logs: `%APPDATA%\Codex Pixel Engine Demo\logs\runtime-log.txt`
+
+The runtime log records Electron load events, renderer console messages, startup errors, and ECS scene construction milestones.

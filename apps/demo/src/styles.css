@@ -69,6 +69,32 @@ body {
   color: #c8d7f2;
 }
 
+.startup-error {
+  position: fixed;
+  inset: 24px;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  padding: 24px;
+  color: #f7fbff;
+  background: #121a29;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  text-align: center;
+}
+
+.startup-error h1,
+.startup-error p {
+  margin: 0;
+}
+
+.startup-error code {
+  padding: 10px 12px;
+  overflow-wrap: anywhere;
+  color: #f7d58b;
+  background: rgba(255, 255, 255, 0.08);
+}
+
 @media (max-width: 900px) {
   .game-shell {
     grid-template-columns: 1fr;
