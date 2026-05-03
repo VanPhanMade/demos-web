@@ -2,6 +2,8 @@
 
 This workspace contains the reusable pixel-art game engine package and the Electron demo app.
 
+For AI-assisted development, start with [AGENTS.md](AGENTS.md). The project-local skill tree lives in [docs/skills](docs/skills/README.md).
+
 ## Development
 
 ```powershell

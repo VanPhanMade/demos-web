@@ -11,7 +11,7 @@
     "dist": "npm run dist -w @codex-game/demo",
     "dist:win": "npm run dist:win -w @codex-game/demo",
     "dev": "npm run dev -w @codex-game/demo",
-    "test": "npm run test -w @codex-game/engine",
+    "test": "npm run test -w @codex-game/engine && npm run test -w @codex-game/demo",
     "typecheck": "npm run typecheck -w @codex-game/engine && npm run typecheck -w @codex-game/demo"
   },
   "devDependencies": {

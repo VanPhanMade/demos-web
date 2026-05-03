@@ -6,10 +6,13 @@ import {
 } from "@codex-game/engine";
 
 import {
+  Collider,
   PlayerControlled,
+  Pushable,
   Sprite,
   Transform,
   Velocity,
+  type ColliderData,
   type SpriteData
 } from "./components";
 
@@ -40,14 +43,19 @@ export function setupDemoScene({ world, input }: SetupContext): void {
   world.addComponent(player, Transform, { x: 48, y: 48 });
   world.addComponent(player, Velocity, { x: 0, y: 0 });
   world.addComponent(player, PlayerControlled, { speed: 72 });
+  world.addComponent(player, Collider, createCollider());
   world.addComponent(player, Sprite, createSprite("player"));
 
   const crate = world.createEntity();
   world.addComponent(crate, Transform, { x: 152, y: 96 });
+  world.addComponent(crate, Collider, createCollider());
+  world.addComponent(crate, Pushable, { weight: 1 });
   world.addComponent(crate, Sprite, createSprite("crate"));
 
   const crateTwo = world.createEntity();
   world.addComponent(crateTwo, Transform, { x: 216, y: 140 });
+  world.addComponent(crateTwo, Collider, createCollider());
+  world.addComponent(crateTwo, Pushable, { weight: 1 });
   world.addComponent(crateTwo, Sprite, createSprite("crate"));
 }
 
@@ -66,8 +74,8 @@ export function createDemoSystems(): System[] {
         velocity.y = input.getAxis("moveY") * player.speed;
       }
     }),
-    createSystem("movement", ({ frame, world }) => {
-      for (const entity of world.query(Transform, Velocity)) {
+    createSystem("physics-movement", ({ frame, world }) => {
+      for (const entity of world.query(Transform, Velocity, Collider)) {
         const transform = world.getComponent(entity, Transform);
         const velocity = world.getComponent(entity, Velocity);
 
@@ -75,15 +83,17 @@ export function createDemoSystems(): System[] {
           continue;
         }
 
-        transform.x = clamp(
-          transform.x + velocity.x * frame.deltaTime,
+        moveWithCollision(
+          entity,
+          velocity.x * frame.deltaTime,
           0,
-          WORLD_WIDTH - 16
+          world
         );
-        transform.y = clamp(
-          transform.y + velocity.y * frame.deltaTime,
+        moveWithCollision(
+          entity,
           0,
-          WORLD_HEIGHT - 16
+          velocity.y * frame.deltaTime,
+          world
         );
       }
     }),
@@ -148,6 +158,147 @@ function createSprite(frame: string): SpriteData {
     width: 16,
     height: 16
   };
+}
+
+function createCollider(): ColliderData {
+  return {
+    width: 16,
+    height: 16,
+    solid: true
+  };
+}
+
+function moveWithCollision(
+  entity: number,
+  deltaX: number,
+  deltaY: number,
+  world: SetupContext["world"]
+): void {
+  if (deltaX === 0 && deltaY === 0) {
+    return;
+  }
+
+  const transform = world.getComponent(entity, Transform);
+  const collider = world.getComponent(entity, Collider);
+
+  if (!transform || !collider) {
+    return;
+  }
+
+  const originalX = transform.x;
+  const originalY = transform.y;
+  transform.x = clamp(transform.x + deltaX, 0, WORLD_WIDTH - collider.width);
+  transform.y = clamp(transform.y + deltaY, 0, WORLD_HEIGHT - collider.height);
+
+  const collision = findCollision(entity, world);
+  if (!collision) {
+    return;
+  }
+
+  const pushSucceeded =
+    world.hasComponent(collision, Pushable) &&
+    pushEntity(collision, deltaX, deltaY, entity, world);
+
+  if (pushSucceeded && !findCollision(entity, world)) {
+    return;
+  }
+
+  transform.x = originalX;
+  transform.y = originalY;
+}
+
+function pushEntity(
+  entity: number,
+  deltaX: number,
+  deltaY: number,
+  pusher: number,
+  world: SetupContext["world"]
+): boolean {
+  const transform = world.getComponent(entity, Transform);
+  const collider = world.getComponent(entity, Collider);
+
+  if (!transform || !collider) {
+    return false;
+  }
+
+  const originalX = transform.x;
+  const originalY = transform.y;
+  const nextX = transform.x + deltaX;
+  const nextY = transform.y + deltaY;
+
+  if (
+    nextX < 0 ||
+    nextY < 0 ||
+    nextX + collider.width > WORLD_WIDTH ||
+    nextY + collider.height > WORLD_HEIGHT
+  ) {
+    return false;
+  }
+
+  transform.x = nextX;
+  transform.y = nextY;
+
+  const blocked = findCollision(entity, world, pusher);
+  if (blocked) {
+    transform.x = originalX;
+    transform.y = originalY;
+    return false;
+  }
+
+  return true;
+}
+
+function findCollision(
+  entity: number,
+  world: SetupContext["world"],
+  ignoredEntity?: number
+): number | undefined {
+  const transform = world.getComponent(entity, Transform);
+  const collider = world.getComponent(entity, Collider);
+
+  if (!transform || !collider || !collider.solid) {
+    return undefined;
+  }
+
+  for (const other of world.query(Transform, Collider)) {
+    if (other === entity || other === ignoredEntity) {
+      continue;
+    }
+
+    const otherTransform = world.getComponent(other, Transform);
+    const otherCollider = world.getComponent(other, Collider);
+
+    if (!otherTransform || !otherCollider || !otherCollider.solid) {
+      continue;
+    }
+
+    if (
+      overlaps(
+        transform,
+        collider,
+        otherTransform,
+        otherCollider
+      )
+    ) {
+      return other;
+    }
+  }
+
+  return undefined;
+}
+
+function overlaps(
+  leftTransform: { x: number; y: number },
+  leftCollider: ColliderData,
+  rightTransform: { x: number; y: number },
+  rightCollider: ColliderData
+): boolean {
+  return (
+    leftTransform.x < rightTransform.x + rightCollider.width &&
+    leftTransform.x + leftCollider.width > rightTransform.x &&
+    leftTransform.y < rightTransform.y + rightCollider.height &&
+    leftTransform.y + leftCollider.height > rightTransform.y
+  );
 }
 
 function drawBackground(
