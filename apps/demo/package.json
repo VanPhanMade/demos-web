@@ -1,12 +1,19 @@
 {
   "name": "@codex-game/demo",
+  "productName": "Codex Pixel Engine Demo",
   "version": "0.1.0",
+  "description": "A pixel-art Electron game framework demo.",
+  "author": "Codex Game",
   "private": true,
+  "main": "dist-electron/main.js",
   "scripts": {
     "build": "npm run build:renderer && npm run build:electron",
     "build:electron": "tsc -p tsconfig.electron.json",
     "build:renderer": "vite build",
     "dev": "node ./scripts/dev.cjs",
+    "dist": "npm run build && electron-builder --config electron-builder.json",
+    "dist:dir": "npm run build && electron-builder --config electron-builder.json --dir",
+    "dist:win": "npm run build && electron-builder --config electron-builder.json --win",
     "start": "electron ./dist-electron/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit"
   },

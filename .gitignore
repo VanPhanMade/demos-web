@@ -2,5 +2,7 @@ node_modules/
 .npm-cache/
 dist/
 dist-electron/
+release/
 coverage/
 *.log
+*.tsbuildinfo

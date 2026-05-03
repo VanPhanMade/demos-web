@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "build": "npm run build -w @codex-game/engine && npm run build -w @codex-game/demo",
+    "dist": "npm run dist -w @codex-game/demo",
+    "dist:win": "npm run dist:win -w @codex-game/demo",
     "dev": "npm run dev -w @codex-game/demo",
     "test": "npm run test -w @codex-game/engine",
     "typecheck": "npm run typecheck -w @codex-game/engine && npm run typecheck -w @codex-game/demo"
@@ -15,9 +17,9 @@
   "devDependencies": {
     "@types/node": "^20.11.30",
     "electron": "^25.9.8",
+    "electron-builder": "^24.13.3",
     "typescript": "^5.4.5",
     "vite": "^4.5.3",
     "vitest": "^0.34.6"
   }
 }
-
